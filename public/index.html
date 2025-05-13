@@ -42,7 +42,7 @@
 
         function renderMenssage(message) {
             $('.messages').append('<div class="message"><strong>' + 
-              message.autor +  
+              message.usuario +  
               message.data_hora +
               '</strong>' +
               message.message
@@ -86,7 +86,7 @@
 
             //Criação do objeto JSON da mensagem
             var messageObject = {
-                autor: user,
+                usuario: user,
                 data_hora: data_hora_msg,
                 message: message
             }
