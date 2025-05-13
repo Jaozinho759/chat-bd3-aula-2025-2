@@ -1,8 +1,8 @@
-const express = require('express')
+const express = require('express');
 const http = require('http');
 const socket = require('socket.io')
-const ejs = require('ejs')
-const path = require('path')
+const ejs = require('ejs');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -11,34 +11,47 @@ const io = socket(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.set('view', path.join(__dirname, 'public'))
+app.set('view', path.join(__dirname, 'public'));
 
 app.engine('html', ejs.renderFile);
 
 app.use('/', (req, res) => {
-    res.render('index.html');
+
+    res.render('index.html')
+
 })
 
-/* LOGICA DE SOCKE.IO EMVIO E PROPAGAÇÃO DE MENSAGENS*/
+// logica do Socket.IO - envio e propagação de mensagens
 
-/* ESTRUTURA DE CONEXÃO DO SOCKET.IO*/
+//Array que simula o banco de dados:
 
-let menssagens = []
+let messages = []
 
-io.on('connection', socket => {
-    console.log("NOVO USUÁRIO CONECTADO: " + socket.id);
+// Estrutura de Conexão do Socket.IO
 
-    socket.emit('previousMessage', menssagens);
+io.on('connection', socketResp =>{
+    
+    console.log('Novo Usúario Conectado: ' + socketResp.id)
 
-    socket.on('sendMessage', data => {
-        menssagens.push(data)
+    //Recupera e mantém (exibe) as mensagens entre o front e o back
 
-        socket.broadcast.emit('reciveMessage', data);
-    })
+    socketResp.emit('previousMessage', messages);
 
+    //Lógica de chat quando uma mensagem é enviada
+
+    socketResp.on('sendMessage', data =>{
+
+        //Adiciona a mensagem no final do array de messagens
+
+        messages.push(data);
+
+        socketResp.broadcast.emit('receivedMessage', data);
+
+        console.log('Qtd. Mesagens: ' + messages.length );
+    });
+
+    console.log('Qtd. Mesagens: ' + messages.length);
 
 });
 
-server.listen(3000, () => {
-    console.log('CHAT RODANDO EM - http://localhost:3000')
-});
+server.listen(3000, ()=>{console.log('Está tudo online em - http://localhost:3000')});

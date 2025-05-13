@@ -4,53 +4,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHAT - MONGODB</title>
-
     <link rel="stylesheet" href="./styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
+    <title>CHAT - MONGODB</title>
 
 </head>
 
 <body>
 
     <div class="container">
-        <h1>### CHAT EM MONGODB ###</h1>
 
+        <h1>Chat com o MongoDB</h1>
         <form id="chat">
-            <input type="text" name="username" placeholder="Digite seu nome">
-            <br>
-            <input type="text" name="message" id="message" placeholder="Digite sua mensagem">
-            <br>
+
+            <input type="text" name="username" id="username" placeholder="Digite o seu nome de usúario" />
+            <br />
+            <input multiple type="text" name="message" id="message" placeholder="Digite sua mensagem" />
+            <br />
             <button type="submit">Enviar</button>
 
             <div class="messages"></div>
+
         </form>
 
     </div>
 
     <script src="socket.io/socket.io.js"></script>
+
     <script>
-        //Comexão com o socket.io do backend
-        const socket = io('http://localhost:3000');
 
-        //  Recupera os dados de usuario e da mensagem do usuario
-        $('#chat').submit(function(event){
+        //Conexão com o Socket.IO do Back-End
 
-            event.preventDefault();
-            //alert('deu certo');
+        const socket = io('http://localhost:3000')
 
-            //Recupera os dados de usuario e mensangem
-            let usuario = $('input[name_username]').val();
-            let mensagem = $('input[name_message]').val();
+        //Função de renderização de mensagem no navegador
 
-            console.log('USUARIO' + usuario);
-            console.log('USUARIO' + mensagem);
+        function renderMenssage(message) {
+            $('.messages').append('<div class="message"><strong>' + 
+              message.autor +  
+              message.data_hora +
+              '</strong>' +
+              message.message
+            );
+        }
 
-            //Data e hora do envio da mensagem
+        //Recupera as mensagem anteriores de todos usuários e exibe no navegador
+        socket.on('previousMessage', function(messages){
+            for(messages of message){
+                renderMenssage(message);
+            }
 
         });
+
+        //Renderiza novas mensagens enviadas por outros usuários
+
+        socket.on('receivedMessage', function (message){
+            renderMenssage(message);
+        });
+
+        //Captura os dados de usúario e de mensagens do usúario
+
+        $('#chat').submit(function(event){
+
+            event.preventDefault()
+            // alert('Fununcia')
+
+            //Recupera os dados de usuário e mensagem:
+
+            var user = $('input[name=username]').val();
+            var message = $('input[name=message]').val();
+
+            console.log('Usuário: ' + user);
+            console.log('Mensagem: ' + message);
+            
+            //Data e hora de envio da mensagem
+
+            let data_hora_obj = new Date();
+
+            let data_hora_msg = `[${data_hora_obj.getDate()}/${data_hora_obj.getMonth()}/${data_hora_obj.getFullYear()}-${data_hora_obj.getHours()}:${data_hora_obj.getMinutes()}:${data_hora_obj.getSeconds()}]`;
+
+            //Criação do objeto JSON da mensagem
+            var messageObject = {
+                autor: user,
+                data_hora: data_hora_msg,
+                message: message
+            }
+
+            renderMenssage(messageObject);
+
+            socket.emit('sendMessage', messageObject);
+
+            console.log('JSON: '+ JSON.stringify(messageObject));
+        });
+
     </script>
+
 </body>
 
 </html>
