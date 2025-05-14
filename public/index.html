@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
-    <title>CHAT - MONGODB</title>
+    <title>Chat MongoDB</title>
 
 </head>
 
@@ -15,16 +16,19 @@
 
     <div class="container">
 
-        <h1>Chat com o MongoDB</h1>
+        <h1>CHAT COM O MONGODB</h1>
         <form id="chat">
 
-            <input type="text" name="username" id="username" placeholder="Digite o seu nome de usúario" />
-            <br />
-            <input multiple type="text" name="message" id="message" placeholder="Digite sua mensagem" />
-            <br />
-            <button type="submit">Enviar</button>
+            <div class="inputs">
+                <input type="text" name="username" id="username" placeholder="Digite o seu nome de usúario" />
+                <br />
+                <input multiple type="text" name="message" id="message" placeholder="Digite sua mensagem" />
+                <br />
+                <button type="submit">Enviar</button>
+            </div>
 
             <div class="messages"></div>
+
 
         </form>
 
@@ -38,36 +42,43 @@
 
         const socket = io('http://localhost:3000')
 
-        //Função de renderização de mensagem no navegador
+        //Função de de renderização de mensagem no navegador
 
-        function renderMenssage(message) {
-            $('.messages').append('<div class="message"><strong>' + 
-              message.usuario +  
-              message.data_hora +
-              '</strong>' +
-              message.message
-            );
+        function renderMessage(message) {
+
+            $(".messages").append('<div class="message"><strong>' +
+                message.data_hora + ' ' +
+                message.usuario + ': ' +
+                '</strong>' +
+                message.message
+
+            )
         }
 
-        //Recupera as mensagem anteriores de todos usuários e exibe no navegador
-        socket.on('previousMessage', function(messages){
-            for(messages of message){
-                renderMenssage(message);
+        //Recupera as mensagens amteropres de todos usuarios e exibe no navegador
+
+        socket.on('previousMessage', function (messages) {
+
+            for (message of messages) {
+
+                renderMessage(message)
             }
 
-        });
+        })
 
-        //Renderiza novas mensagens enviadas por outros usuários
+        //Renderiza novas mensagens enviadas por outros usuarios
 
-        socket.on('receivedMessage', function (message){
-            renderMenssage(message);
-        });
+        socket.on('receivedMessage', function (message) {
+
+            renderMessage(message)
+
+        })
 
         //Captura os dados de usúario e de mensagens do usúario
 
-        $('#chat').submit(function(event){
+        $('#chat').submit(function (e) {
 
-            event.preventDefault()
+            e.preventDefault()
             // alert('Fununcia')
 
             //Recupera os dados de usuário e mensagem:
@@ -77,25 +88,29 @@
 
             console.log('Usuário: ' + user);
             console.log('Mensagem: ' + message);
-            
-            //Data e hora de envio da mensagem
+
+            //Data e hora de envio de mensagem
 
             let data_hora_obj = new Date();
 
-            let data_hora_msg = `[${data_hora_obj.getDate()}/${data_hora_obj.getMonth()}/${data_hora_obj.getFullYear()}-${data_hora_obj.getHours()}:${data_hora_obj.getMinutes()}:${data_hora_obj.getSeconds()}]`;
+            let data_hora_msg = `[ ${data_hora_obj.getDate()}/${data_hora_obj.getMonth()}/${data_hora_obj.getFullYear()} - ${data_hora_obj.getHours()}:${data_hora_obj.getMinutes()}:${data_hora_obj.getSeconds()}]`
 
-            //Criação do objeto JSON da mensagem
-            var messageObject = {
-                usuario: user,
+            // Criação do objeto JSON da mensagem
+
+            var messageObjetc = {
+
                 data_hora: data_hora_msg,
+                usuario: user,
                 message: message
             }
 
-            renderMenssage(messageObject);
+            renderMessage(messageObjetc)
 
-            socket.emit('sendMessage', messageObject);
+            socket.emit('sendMessage', messageObjetc);
 
-            console.log('JSON: '+ JSON.stringify(messageObject));
+            console.log('JSON: ' + JSON.stringify(messageObjetc))
+
+
         });
 
     </script>
